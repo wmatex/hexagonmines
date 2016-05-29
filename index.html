@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width: device-width">
+    <title>Hexagon Mines!</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrapper">
+    <header>
+        Hexagon Mines
+        <nav>
+            <ul>
+                <li><a href="javascript:router.redirect('test1');">New game</a></li>
+                <li><a href="javascript:router.redirect('test2');">Highscores</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section class="game">
+        <canvas></canvas>
+    </section>
+    <footer>
+        &copy; 2016 Matej Vavrinec &lt;vavrimat@fel.cvut.cz&gt;
+    </footer>
+
+    <script src="js/Router.js"></script>
+    <script>
+        var router = new app.router("/~wmatex/HexagonMines/");
+        router
+                .add("test1", "test1", function() {
+                    console.log("Test1 route callback");
+                })
+                .add("test2", "test2", function() {
+                    console.log("Test2 route callback");
+                });
+        router.init();
+    </script>
+</div>
+</body>
+</html>
