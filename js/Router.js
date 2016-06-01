@@ -42,7 +42,6 @@ var app = (function(app) {
         });
 
         window.addEventListener("popstate", function(e) {
-            console.log(e.state);
             if (e.state && e.state.route && e.state.route in self._routesByName) {
                 self._goto(self._routesByName[e.state.route]);
             }

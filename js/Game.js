@@ -5,7 +5,7 @@ var app = (function(app) {
         this._level = level || this.level.SMALL;
         this._field = new app.game.field(level[0], level[1]);
 
-        this._field.render();
+        this._field.render(document.querySelector('.game canvas').getContext('2d'));
     };
 
     app.game.level = {
