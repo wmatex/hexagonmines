@@ -1,13 +1,10 @@
-window.app = (function(app) {
+var app = (function(app) {
     app.router = function(base) {
         this._routesByPath = {};
         this._routesByName = {};
         base = base || "/";
         if (base[0] !== '/') {
             base = '/' + base;
-        }
-        if (base[base.length - 1] !== '/') {
-            base += '/';
         }
 
         this._base = base;
@@ -37,7 +34,7 @@ window.app = (function(app) {
         document.addEventListener("DOMContentLoaded", function() {
             // Extract the current location and try to change the route if it exists
             var loc = window.location.pathname;
-            loc = loc.replace(/\/(\?.*)?$/, '');
+            loc = loc.replace(/\?.*?$/, '');
 
             if (loc in self._routesByPath) {
                 self._goto(self._routesByPath[loc]);
@@ -46,7 +43,9 @@ window.app = (function(app) {
 
         window.addEventListener("popstate", function(e) {
             console.log(e.state);
-            self._goto(self._routesByName[e.state.route]);
+            if (e.state && e.state.route && e.state.route in self._routesByName) {
+                self._goto(self._routesByName[e.state.route]);
+            }
         });
     };
 
@@ -56,4 +55,4 @@ window.app = (function(app) {
     };
 
     return app;
-})(window.app || {});
+})(app || {});

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width: device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hexagon Mines!</title>
 
     <link rel="stylesheet" href="css/style.css">
@@ -13,8 +13,9 @@
         Hexagon Mines
         <nav>
             <ul>
-                <li><a href="javascript:router.redirect('test1');">New game</a></li>
-                <li><a href="javascript:router.redirect('test2');">Highscores</a></li>
+                <li><a href="#">New game</a></li>
+                <li><a href="#">Saved games</a></li>
+                <li><a href="#">Highscores</a></li>
             </ul>
         </nav>
     </header>
@@ -22,17 +23,25 @@
         <canvas></canvas>
     </section>
     <footer>
-        &copy; 2016 Matej Vavrinec &lt;vavrimat@fel.cvut.cz&gt;
+        &copy; 2016 Matěj Vavřinec &lt;vavrimat@fel.cvut.cz&gt;
     </footer>
 
     <script src="js/Router.js"></script>
+    <script src="js/Render.js"></script>
+    <script src="js/Game.js"></script>
+    <script src="js/Field.js"></script>
     <script>
-        var router = new app.router("/~wmatex/HexagonMines/");
+        console.log(app);
+        var game = new app.game(app.game.level.SMALL);
+        var router = new app.router("/hexagonmines");
         router
-                .add("test1", "test1", function() {
+                .add("/", "root", function() {
+                    console.log("root");
+                })
+                .add("/test1", "test1", function() {
                     console.log("Test1 route callback");
                 })
-                .add("test2", "test2", function() {
+                .add("/test2", "test2", function() {
                     console.log("Test2 route callback");
                 });
         router.init();
