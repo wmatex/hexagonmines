@@ -20,7 +20,6 @@
         </nav>
     </header>
     <section class="game">
-        <canvas width="2024" height="1768"></canvas>
     </section>
     <footer>
         &copy; 2016 Matěj Vavřinec &lt;vavrimat@fel.cvut.cz&gt;
@@ -30,20 +29,21 @@
     <script src="js/Game.js"></script>
     <script src="js/Field.js"></script>
     <script>
-        console.log(app);
-        var game = new app.game(app.game.level.SMALL);
-        var router = new app.router("/hexagonmines");
-        router
-                .add("/", "root", function() {
-                    console.log("root");
-                })
-                .add("/test1", "test1", function() {
-                    console.log("Test1 route callback");
-                })
-                .add("/test2", "test2", function() {
-                    console.log("Test2 route callback");
-                });
-        router.init();
+        window.addEventListener('load', function() {
+            var game = new app.game(document.querySelector('.game'), app.game.level.LARGE);
+            var router = new app.router("/hexagonmines");
+            router
+                    .add("/", "root", function () {
+                        console.log("root");
+                    })
+                    .add("/test1", "test1", function () {
+                        console.log("Test1 route callback");
+                    })
+                    .add("/test2", "test2", function () {
+                        console.log("Test2 route callback");
+                    });
+            router.init();
+        });
     </script>
 </div>
 </body>
