@@ -5,21 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hexagon Mines!</title>
 
+    <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="wrapper">
     <header>
         Hexagon Mines
         <nav>
             <ul>
-                <li><a href="#">New game</a></li>
-                <li><a href="#">Saved games</a></li>
-                <li><a href="#">Highscores</a></li>
+                <li><a href="#new"><span class="fa fa-plus fa-fw"></span>New game</a></li>
+                <li><a href="#save"><span class="fa fa-save fa-fw"></span>Save game</a></li>
+                <li><a href="#load"><span class="fa fa-folder-open fa-fw"></span>Load last game</a></li>
+                <li><a href="highscores"><span class="fa fa-trophy fa-fw"></span>Highscores</a></li>
             </ul>
         </nav>
     </header>
     <section class="game">
+        <div class="info">
+            <ul>
+                <li class="mines"><span class="fa fa-bomb"></span><span class="found">0</span>/<span class="sum">0</span></li>
+                <li class="time"><span class="fa fa-clock-o"></span><span class="counter">00:00</span></li>
+            </ul>
+        </div>
+        <a href="#fullscreen" class="fa fa-arrows-alt"></a>
+    </section>
+    <section class="highscores hidden">
+        <h1>Highscores</h1>
+        <table>
+        </table>
     </section>
     <footer>
         &copy; 2016 Matěj Vavřinec &lt;vavrimat@fel.cvut.cz&gt;
@@ -28,23 +41,47 @@
     <script src="js/Router.js"></script>
     <script src="js/Game.js"></script>
     <script src="js/Field.js"></script>
+    <script src="js/Highscores.js"></script>
     <script>
-        window.addEventListener('load', function() {
-            var game = new app.game(document.querySelector('.game'), app.game.level.LARGE);
-            var router = new app.router("/hexagonmines");
-            router
-                    .add("/", "root", function () {
-                        console.log("root");
-                    })
-                    .add("/test1", "test1", function () {
-                        console.log("Test1 route callback");
-                    })
-                    .add("/test2", "test2", function () {
-                        console.log("Test2 route callback");
-                    });
-            router.init();
+        var router = new app.router("/hexagonmines");
+        var game = null;
+        router
+                .add("/", "root", function () {
+                    console.log("root");
+                    if (game === null) {
+                        game = new app.game(document.querySelector('.game'), app.game.level.SMALL);
+                    }
+                    game.start();
+
+                })
+                .add("/highscores", "highscores", function () {
+                    console.log("Highscores");
+                    if (game === null) {
+                        game = new app.game(document.querySelector('.game'), app.game.level.SMALL);
+                    }
+                    game.highscores.addNew('wmatex', 30, parseInt(Math.random() * 100));
+                    game.highscores.open();
+                });
+        router.init();
+        document.addEventListener('DOMContentLoaded', function() {
+
+            document.querySelector('nav a[href="#save"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                game.save();
+            });
+            document.querySelector('nav a[href="#load"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                game.load();
+            });
+            document.querySelector('nav a[href="#new"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                game.new(app.game.level.MEDIUM);
+            });
+            document.querySelector('nav a[href="highscores"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                router.redirect('highscores');
+            });
         });
     </script>
-</div>
 </body>
 </html>

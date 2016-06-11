@@ -1,10 +1,13 @@
-var app;
-app = (function (app) {
-    var MINE_PROB = 0.2; // 10% chance of generating a mine
+var app = (function (app) {
     var X_LENGTH = 1.7320508; // sqrt(3)
     var HEX_SIZE = null;
+    var MARGIN = 2;
+    var NUMBER = 0;
+    var MINE = 1;
 
-    app.game.field = function (canvasWidth, canvasHeight, width, height) {
+    app.game.field = function (canvasWidth, canvasHeight, width, height, mineCount) {
+        canvasHeight -= 2*MARGIN;
+        canvasWidth -= 2*MARGIN;
         if (canvasWidth > canvasHeight) {
             if (height > width) {
                 var tmp = width;
@@ -29,55 +32,70 @@ app = (function (app) {
             HEX_SIZE = 2 * canvasHeight / (3*height + 1);
         }
 
-        console.log(HEX_SIZE, X_LENGTH);
-
         this._width = width;
         this._height = height;
         this._data = [];
-        this._data.getNeighbourhood = function (y, x) {
-            var neighbours = [];
-
-            function pushFields(field, neigh, c) {
-                for (var i = 0; i < c.length; i++) {
-                    if (c[i][0] >= 0 && c[i][0] < field.length && c[i][1] >= 0 && c[i][1] < field[c[i][0]].length) {
-                        neigh.push(field[c[i][0]][c[i][1]]);
-                    }
-                }
-            }
-
-            if (y % 2 == 0) {
-                pushFields(this, neighbours, [
-                    [y - 1, x - 1], [y - 1, x],
-                    [y + 1, x - 1], [y + 1, x]
-                ]);
-            } else {
-                pushFields(this, neighbours, [
-                    [y - 1, x], [y - 1, x + 1],
-                    [y + 1, x], [y + 1, x + 1]
-                ]);
-            }
-            pushFields(this, neighbours, [
-                [y, x - 1], [y, x + 1]
-            ]);
-
-            return neighbours;
-        };
+        this._mines = mineCount;
 
         _generateRandomField.call(this);
     };
 
     app.game.field.constructor = app.game.field;
+    app.game.field.prototype.getNeighbourhood = function (y, x) {
+        var neighbours = [];
+
+        function pushFields(field, neigh, c) {
+            for (var i = 0; i < c.length; i++) {
+                if (c[i][0] >= 0 && c[i][0] < field.length && c[i][1] >= 0 && c[i][1] < field[c[i][0]].length) {
+                    neigh.push(field[c[i][0]][c[i][1]]);
+                }
+            }
+        }
+
+        if (y % 2 == 0) {
+            pushFields(this._data, neighbours, [
+                [y - 1, x - 1], [y - 1, x],
+                [y + 1, x - 1], [y + 1, x]
+            ]);
+        } else {
+            pushFields(this._data, neighbours, [
+                [y - 1, x], [y - 1, x + 1],
+                [y + 1, x], [y + 1, x + 1]
+            ]);
+        }
+        pushFields(this._data, neighbours, [
+            [y, x - 1], [y, x + 1]
+        ]);
+
+        return neighbours;
+    };
 
     var _generateRandomField = function () {
+        var m = 0;
+        var positions = [];
+        while (m < this._mines) {
+            var pos = parseInt(Math.random() * this._height*this._width);
+            if (positions.indexOf(pos) < 0) {
+                positions.push(pos);
+                m++;
+            }
+        }
+        positions.sort(function(a, b) {
+            return a-b;
+        });
+        pos = 0;
+        var i = 0;
         // Generate mines at random positions
         for (var y = 0; y < this._height; y++) {
             var row = [];
             for (var x = 0; x < this._width; x++) {
-                if (Math.random() < MINE_PROB) {
+                if (pos == positions[i]) {
                     row.push(new app.game.field.mine(y, x));
+                    i++;
                 } else {
                     row.push(null);
                 }
+                pos++;
             }
             this._data.push(row);
         }
@@ -87,7 +105,7 @@ app = (function (app) {
         for (y = 0; y < this._height; y++) {
             for (x = 0; x < this._width; x++) {
                 if (this._data[y][x] === null) {
-                    neigh = this._data.getNeighbourhood(y, x);
+                    neigh = this.getNeighbourhood(y, x);
                     var nMines = 0;
                     for (var i = 0; i < neigh.length; i++) {
                         if (neigh[i] instanceof app.game.field.mine) {
@@ -98,6 +116,16 @@ app = (function (app) {
                 }
             }
         }
+    };
+
+    app.game.field.prototype.markMines = function() {
+      for (var y = 0; y < this._data.length; y++) {
+          for (var x = 0; x < this._data[y].length; x++) {
+              if (this._data[y][x] instanceof app.game.field.mine) {
+                  this._data[y][x].show();
+              }
+          }
+      }
     };
 
     app.game.field.prototype.getUnderCursor = function(x, y) {
@@ -117,6 +145,69 @@ app = (function (app) {
         }
     };
 
+    app.game.field.prototype.checkMarks = function() {
+        var marks = 0;
+        for (var y = 0; y < this._data.length; y++) {
+            for (var x = 0; x < this._data[y].length; x++) {
+                if (this._data[y][x]._marked && this._data[y][x] instanceof app.game.field.mine) {
+                    marks++;
+                } else if (this._data[y][x]._marked && ! (this._data[y][x] instanceof app.game.field.mine)) {
+                    return -1;
+                }
+            }
+        }
+
+        return marks;
+    };
+
+    app.game.field.prototype.serialize = function() {
+        var serialized = {
+            width: this._width,
+            height: this._height,
+            data: []
+        };
+
+        for (var y = 0; y < this._data.length; y++) {
+            for (var x = 0; x < this._data[y].length; x++) {
+                var tile = this._data[y][x];
+                serialized.data.push({
+                    clicked: tile._clicked,
+                    marked: tile._marked,
+                    type: tile instanceof app.game.field.mine ? MINE : NUMBER,
+                    number: tile._n
+                });
+            }
+        }
+
+        return serialized;
+    };
+
+    app.game.field.prototype.load = function(serialized) {
+        this._width = serialized.width;
+        this._height = serialized.height;
+
+        this._data = [];
+        var i = 0;
+        this._mines = 0;
+        for (var y = 0; y < this._height; y++) {
+            var row = [];
+            for (var x = 0; x < this._width; x++) {
+                var tile = serialized.data[i];
+                if (tile.type == MINE) {
+                    var t = new app.game.field.mine(y,x);
+                    this._mines++;
+                } else {
+                    var t = new app.game.field.numbertile(y, x, tile.number);
+                }
+                t._clicked = tile.clicked;
+                t._marked = tile.marked;
+                row.push(t);
+                i++;
+            }
+            this._data.push(row);
+        }
+    };
+
     app.game.field.prototype.render = function (ctx) {
         ctx.clearRect(0, 0, this._cW, this._cH);
         for (var y = 0; y < this._data.length; y++) {
@@ -131,6 +222,7 @@ app = (function (app) {
         this._x = x;
 
         this._clicked = false;
+        this._marked = false;
 
         var offset = this._y % 2 == 1 ? this.rel(X_LENGTH/2.0) : 0;
         this._origin = [offset+this._x*this.rel(X_LENGTH), this.rel(0.5) + this.rel(1.5*this._y)];
@@ -161,7 +253,11 @@ app = (function (app) {
     };
 
     app.game.field.tile.prototype.render = function (ctx) {
-        ctx.strokeStyle = "blue";
+        if (this._clicked) {
+            ctx.fillStyle = "#cccccc";
+        } else {
+            ctx.fillStyle = "#eeeeee";
+        }
         ctx.lineWidth = 1;
 
         ctx.translate(this._origin[0], this._origin[1]);
@@ -173,36 +269,86 @@ app = (function (app) {
         }
         ctx.closePath();
 
+        ctx.fill();
+        ctx.strokeStyle = "black";
         ctx.stroke();
+
+        if (this._marked) {
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "black";
+            ctx.moveTo(this.rel(X_LENGTH/2.0), this.rel(1));
+            ctx.lineTo(this.rel(X_LENGTH/2.0), 0);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = "red";
+            ctx.moveTo(this.rel(X_LENGTH*0.5), 0);
+            ctx.lineTo(this.rel(X_LENGTH*0.80), this.rel(0.25));
+            ctx.lineTo(this.rel(X_LENGTH*0.5), this.rel(0.5));
+            ctx.closePath();
+            ctx.fill();
+        }
     };
 
     app.game.field.tile.prototype.rel = function(val) {
         return val * HEX_SIZE;
     };
-    app.game.field.tile.prototype.click = function(field) {
+    app.game.field.tile.prototype.click = function(auto, field) {
         this._clicked = true;
+        this._marked = false;
+    };
+
+    app.game.field.tile.prototype.markToggle = function() {
+        if (!this._clicked) {
+            this._marked = !this._marked;
+            return true;
+        } else {
+            return false;
+        }
     };
 
     app.game.field.mine = function (y, x) {
         app.game.field.tile.call(this, y, x);
+        this._showed = false;
+
     };
     app.game.field.mine.prototype = Object.create(app.game.field.tile.prototype);
     app.game.field.mine.constructor = app.game.field.mine;
+
     app.game.field.mine.prototype.render = function (ctx) {
         ctx.save();
         app.game.field.tile.prototype.render.call(this, ctx);
 
-        if (this._clicked) {
-            ctx.fillStyle = "red";
+        if (this._showed) {
+            if (this._clicked) {
+                ctx.fillStyle = 'red';
+            }
             ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = 'black';
+            ctx.arc(this.rel(X_LENGTH) / 2, HEX_SIZE/2, HEX_SIZE*0.5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.moveTo(this.rel(X_LENGTH) * 0.75, HEX_SIZE * 0.25);
+            ctx.bezierCurveTo(this.rel(X_LENGTH)*0.75, -HEX_SIZE*0.25, this.rel(X_LENGTH), HEX_SIZE*0.5, this.rel(X_LENGTH) * 0.9, 0.1);
+            ctx.stroke();
         }
+
         ctx.restore();
     };
 
     app.game.field.mine.prototype.click = function(auto, field) {
-        if (!auto) {
-            throw "Game Over";
+        if (!this._marked) {
+            app.game.field.tile.prototype.click.call(this, auto, field);
+            if (!auto) {
+                throw "Game Over";
+            }
         }
+    };
+
+    app.game.field.mine.prototype.show = function() {
+        this._showed = true;
     };
 
 
@@ -217,7 +363,8 @@ app = (function (app) {
         app.game.field.tile.prototype.render.call(this, ctx);
 
         if (this._clicked && this._n > 0) {
-            ctx.font = HEX_SIZE + "px arial";
+            ctx.fillStyle = "black";
+            ctx.font = HEX_SIZE + "px arial bold";
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillText(this._n, this.rel(X_LENGTH / 2.0), this.rel(0.5));
@@ -228,17 +375,19 @@ app = (function (app) {
     };
 
     app.game.field.numbertile.prototype.click = function(auto, field) {
-        app.game.field.tile.prototype.click.call(this, auto, field);
+        if (!this._marked) {
+            app.game.field.tile.prototype.click.call(this, auto, field);
 
-        if (this._n < 1) {
-            var neighbours = field._data.getNeighbourhood(this._y, this._x);
-            for (var i = 0; i < neighbours.length; i++) {
-                if (!neighbours[i]._clicked) {
-                    neighbours[i].click(true, field);
+            if (this._n < 1) {
+                var neighbours = field.getNeighbourhood(this._y, this._x);
+                for (var i = 0; i < neighbours.length; i++) {
+                    if (!neighbours[i]._clicked) {
+                        neighbours[i].click(true, field);
+                    }
                 }
             }
         }
     };
 
     return app;
-})(app || {});
+})(app || {game: {}});
