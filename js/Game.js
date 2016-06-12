@@ -33,14 +33,14 @@ var app = (function(app) {
         container.style.height = canvas.height + "px";
 
         this._info.nextElementSibling.addEventListener('click', function() {
-            if (canvas.requestFullscreen) {
-                canvas.requestFullscreen();
-            } else if (canvas.msRequestFullscreen) {
-                canvas.msRequestFullscreen();
-            } else if (canvas.mozRequestFullScreen) {
-                canvas.mozRequestFullScreen();
-            } else if (canvas.webkitRequestFullscreen) {
-                canvas.webkitRequestFullscreen();
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
             }
         });
 

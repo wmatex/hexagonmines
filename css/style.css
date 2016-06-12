@@ -18,6 +18,10 @@ body {
     flex-direction: column;
 }
 
+a {
+    text-decoration: none;
+    color: black;
+}
 
 header {
     top: 0;
@@ -81,8 +85,11 @@ section.hidden {
     bottom: 0;
     right: 0;
 
-    transition-property: opacity;
-    transition-duration: 1s;
+    -webkit-transition: opacity 1s;
+    -moz-transition: opacity 1s;
+    -ms-transition: opacity 1s;
+    -o-transition: opacity 1s;
+    transition: opacity 1s;
 }
 
 .game canvas:hover + a[href="#fullscreen"],
@@ -100,9 +107,11 @@ section.hidden {
     margin: 10vw;
     box-shadow: 10px 10px 10px grey;
     background-color: lightgrey;
-    transition-property: transform;
-    transition-duration: 1s;
-    transition-timing-function: ease-out;
+    -webkit-transition: transform 1s ease-out;
+    -moz-transition: transform 1s ease-out;
+    -ms-transition: transform 1s ease-out;
+    -o-transition: transform 1s ease-out;
+    transition: transform 1s ease-out;
     z-index: 10;
 }
 
@@ -122,6 +131,27 @@ section.hidden {
 
 .highscores table tr.new {
     background-color: yellow;
+}
+
+.highscores a[href="#close"] {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0);
+}
+
+.overlay.show {
+    display: block;
+    background-color: rgba(0,0,0,0.8);
 }
 
 footer {

@@ -2,6 +2,12 @@ app = (function(app) {
     app.game.highscores = function(container) {
         this._scores = [];
         this._container = container;
+        this._overlay = document.createElement('div');
+        this._overlay.classList.add('overlay');
+        document.body.appendChild(this._overlay);
+
+        this._container.querySelector('a[href="#close"]').addEventListener('click', this.close.bind(this));
+
         var saved = localStorage.getItem('game.highscores');
         if (saved !== null) {
             this._scores = JSON.parse(saved);
@@ -43,8 +49,8 @@ app = (function(app) {
 
     app.game.highscores.prototype.open = function() {
         this._container.classList.remove('hidden');
-        var callback = (function(e) {
-            console.log("transitioned");
+        this._overlay.classList.add('show');
+        var callback = (function() {
             this._sort();
             this._container.removeEventListener('transitionend', callback);
         }).bind(this);
@@ -54,24 +60,24 @@ app = (function(app) {
         }).bind(this), 0);
     };
 
-    app.game.highscores.prototype.close = function(callback) {
-
+    app.game.highscores.prototype.close = function(e) {
+        e.preventDefault();
+        this._overlay.classList.remove('show');
+        this._container.classList.remove('opening');
+        var callback = function(e) {
+            this.removeEventListener('transitionend', callback);
+            router.redirect('root');
+        };
+        this._container.addEventListener('transitionend', callback);
     };
 
     app.game.highscores.prototype._sort = function() {
         console.log(this._newScore);
         if (this._newScore) {
-            var index = 0;
-            console.log(this._scores, this._newScore);
-            for (index = 0; index < this._scores.length && this._newScore.time > this._scores[index].time; index++) ;
+            for (var index = 0; index < this._scores.length && this._newScore.time > this._scores[index].time; index++) ;
 
-            console.log(this._scores);
-            console.log(index);
-            console.log(this._newScore.time);
             var selector = 'table tr:nth-child(' + (index+1) + ')';
-            console.log(selector);
             var nextRow = this._container.querySelector(selector);
-            console.log(nextRow);
 
             var tr = _createRow(this._newScore);
             tr.classList.add('new');

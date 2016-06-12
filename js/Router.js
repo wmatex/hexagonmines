@@ -48,6 +48,15 @@ var app = (function(app) {
         });
     };
 
+    app.router.prototype.controller = function(link, action) {
+        document.querySelector(link).addEventListener('click', function(e) {
+            e.preventDefault();
+            if (typeof action === 'function') {
+                action(e);
+            }
+        });
+    };
+
     app.router.prototype._goto = function(route) {
         window.history.pushState({route: route.name}, "", route.path);
         route.callback();
