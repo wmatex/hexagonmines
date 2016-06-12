@@ -1,0 +1,16 @@
+CACHE MANIFEST
+
+index.html
+js/Field.js
+js/Game.js
+js/Highscores.js
+js/Router.js
+css/style.css
+css/font-awesome.min.css
+fonts/fontawesome-webfont.eot
+fonts/fontawesome-webfont.ttf
+fonts/fontawesome-webfont.woff
+fonts/fontawesome-webfont.woff2
+
+NETWORK:
+sounds/explosion.wav

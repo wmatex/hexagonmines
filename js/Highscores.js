@@ -28,14 +28,22 @@ app = (function(app) {
         tr.appendChild(td);
 
         td = document.createElement('td');
-        td.innerText = data.level;
+        td.innerText = data.level + " mines";
         tr.appendChild(td);
 
         td = document.createElement('td');
-        td.innerText = data.time;
+        td.innerText = _formatTime(data.time);
         tr.appendChild(td);
 
         return tr;
+    }
+
+    function _formatTime(time) {
+        time = parseInt(time/1000);
+        var minutes = parseInt(time/60);
+        var seconds = parseInt(time - minutes*60);
+
+        return ((minutes > 0) ? minutes + "min " : "") + seconds + "s";
     }
 
     app.game.highscores.prototype.addNew = function(name, level, time) {
@@ -44,7 +52,6 @@ app = (function(app) {
             level: level,
             time: time
         };
-        console.log(this._newScore);
     };
 
     app.game.highscores.prototype.open = function() {
@@ -60,8 +67,12 @@ app = (function(app) {
         }).bind(this), 0);
     };
 
+    app.game.highscores.prototype.isOpen = function() {
+        return this._container.classList.contains('opening');
+    };
+
     app.game.highscores.prototype.close = function(e) {
-        e.preventDefault();
+        e && e.preventDefault();
         this._overlay.classList.remove('show');
         this._container.classList.remove('opening');
         var callback = function(e) {
@@ -72,7 +83,6 @@ app = (function(app) {
     };
 
     app.game.highscores.prototype._sort = function() {
-        console.log(this._newScore);
         if (this._newScore) {
             for (var index = 0; index < this._scores.length && this._newScore.time > this._scores[index].time; index++) ;
 

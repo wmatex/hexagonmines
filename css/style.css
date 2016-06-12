@@ -24,12 +24,26 @@ a {
 }
 
 header {
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: cornflowerblue;
     text-align: left;
-    height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+
+    overflow: hidden;
+    position: absolute;
+    background-color: white;
+    width: 50px;
+    height: 50px;
+    z-index: 10;
+}
+
+header:hover {
+    width: 200px;
+    height: 200px;
+    background-color: cornflowerblue;
+}
+
+header .brand {
+    display: none;
 }
 
 header:after {
@@ -38,18 +52,108 @@ header:after {
     content: " ";
 }
 
+header span.fa-bars {
+    float: left;
+}
+
+
 header nav {
-    float: right;
     margin-right: 10px;
+    float: none;
+    display: block;
+    height: 0;
+    overflow: hidden;
+}
+
+
+header:hover nav {
+    height: auto;
+
 }
 
 header nav ul {
-    display: inline-block;
     list-style: none;
+    display: block;
 }
 
 header nav ul li {
-    display: inline;
+    position: relative;
+    padding: 5px;
+    border: 1px solid grey;
+    background-color: white;
+    display: block;
+    width: 100%;
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) {
+    header {
+        position: static;
+        width: 100%;
+        background-color: cornflowerblue;
+        overflow: visible;
+    }
+    header span.brand {
+        display: inline;
+    }
+
+    header a[href="#menu"] {
+        display: none;
+    }
+    header nav ul li {
+        display: inline-block;
+        width: auto;
+    }
+
+    header nav ul {
+        display: inline-block;
+    }
+
+    header nav {
+        float: right;
+        display: inline-block;
+        height: auto;
+        overflow: visible;
+    }
+
+    header:hover {
+        width: 100%;
+        height: auto;
+    }
+}
+
+header nav ul li:hover {
+    background-color: cornflowerblue;
+}
+
+
+header nav a[href="#new"] + ul {
+    display: none;
+    position: absolute;
+    right: 0;
+    padding: 10px;
+    background-color: cornflowerblue;
+    text-align: right;
+    border: 1px solid grey;
+    border-top: none;
+    z-index: 100;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+header nav a[href="#new"] + ul li {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+header nav a[href="#new"] + ul a:hover {
+    text-decoration: underline;
+}
+
+header nav a[href="#new"]:hover + ul,
+header nav a[href="#new"] + ul:hover {
+    display: block;
 }
 
 section {
@@ -62,6 +166,7 @@ section.hidden {
 
 .game {
     position: relative;
+    text-align: center;
 }
 
 .game .info {
@@ -71,13 +176,39 @@ section.hidden {
 
 .game .info ul {
     list-style: none;
-    margin: 0 auto;
+}
+
+.game .info ul li {
+    display: inline-block;
+    margin: 10px;
+}
+
+.game .info ul li > span.fa {
+    margin-right: 5px;
 }
 
 .game canvas {
-    width: 100%;
     height: auto;
+    max-width: 100%;
 }
+
+.game:-webkit-full-screen {
+    color: white;
+    background-color: black;
+}
+
+section.game:-webkit-full-screen a {
+    color: white;
+}
+
+.game:-moz-full-screen,
+.game:-webkit-full-screen,
+.game:-ms-fullscreen,
+.game:fullscreen {
+    background-color: black;
+    color: white;
+}
+
 
 .game a[href="#fullscreen"] {
     opacity: 0;
@@ -103,16 +234,38 @@ section.hidden {
     bottom: 0;
     left: 0;
     right: 0;
-    transform: translateY(-100vw);
-    margin: 10vw;
-    box-shadow: 10px 10px 10px grey;
-    background-color: lightgrey;
+    transform: translateY(-100vh);
+    margin: 10vh 10vw;
+    box-shadow: 10px 10px 10px black;
+    background-color: white;
     -webkit-transition: transform 1s ease-out;
     -moz-transition: transform 1s ease-out;
     -ms-transition: transform 1s ease-out;
     -o-transition: transform 1s ease-out;
     transition: transform 1s ease-out;
-    z-index: 10;
+    z-index: 30;
+    text-align: center;
+}
+
+.highscores h1 {
+    margin-top: 2em;
+}
+
+.highscores table {
+    margin: 3em auto;
+    border-collapse: collapse;
+    counter-reset: scores;
+}
+
+.highscores table tr::before {
+    counter-increment: scores;
+    content: counter(scores) ".";
+    padding: 10px;
+    display: block;
+}
+
+.highscores table td {
+    padding: 10px;
 }
 
 .highscores.opening {
@@ -147,6 +300,7 @@ section.hidden {
     left: 0;
     right: 0;
     background-color: rgba(0,0,0,0);
+    z-index: 20;
 }
 
 .overlay.show {
@@ -155,5 +309,9 @@ section.hidden {
 }
 
 footer {
-    height: 30px;
+    text-align: center;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 10px;
 }

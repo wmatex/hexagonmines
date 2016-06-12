@@ -7,7 +7,10 @@ var app = (function(app) {
         this._level = level || this.level.SMALL;
         this._info = container.querySelector('.info');
         this._canvas = _createGameCanvas.call(this, container);
-        this._field = new app.game.field(this._canvas.width, this._canvas.height, level[0], level[1], level[2]);
+        this._field = new app.game.field(this._canvas, level[0], level[1], level[2]);
+
+        this._canvas.addEventListener('mousedown', this._down.bind(this));
+        this._canvas.addEventListener('mouseup', this._up.bind(this, false));
 
         this._running = false;
 
@@ -18,6 +21,8 @@ var app = (function(app) {
 
         this._ctx = this._canvas.getContext('2d');
 
+        _requestNotifications();
+
         this.render();
     };
 
@@ -27,7 +32,6 @@ var app = (function(app) {
 
         var canvas = document.createElement('canvas');
         canvas.width = container.clientWidth;
-        var padding = parseInt(getComputedStyle(document.body).paddingTop) + parseInt(getComputedStyle(document.body).paddingBottom);
         canvas.height = container.clientHeight - this._info.clientHeight;
         canvas.oncontextmenu = "javascript:void(0);";
         container.style.height = canvas.height + "px";
@@ -47,7 +51,13 @@ var app = (function(app) {
         container.insertBefore(canvas, this._info.nextElementSibling);
 
         return canvas;
-    };
+    }
+
+    function _requestNotifications() {
+        if ("Notification" in window && Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
+    }
 
     app.game.prototype.render = function() {
         this._info.querySelector('.mines > .sum').innerText = this._field._mines;
@@ -56,12 +66,12 @@ var app = (function(app) {
     };
 
     app.game.prototype.start = function() {
-        this._canvas.addEventListener('mousedown', this._down.bind(this));
-        this._canvas.addEventListener('mouseup', this._up.bind(this, false));
+        if (!this._running) {
 
-        this._time = new Date();
-        this._interval = setInterval(this._timeCounter.bind(this), 1000);
-        this._running = true;
+            this._time = new Date();
+            this._interval = setInterval(this._timeCounter.bind(this), 1000);
+            this._running = true;
+        }
     };
 
     app.game.prototype.save = function() {
@@ -71,32 +81,40 @@ var app = (function(app) {
             marks: this._marks,
         };
         localStorage.setItem('game', JSON.stringify(serialized));
+        new Notification('Game saved');
     };
 
     app.game.prototype.load = function() {
-        var saved = localStorage.getItem('game');
-        if (saved !== null) {
-            saved = JSON.parse(saved);
-            this._time = new Date() - saved.time;
-            this._marks = saved.marks;
-            this._field.load(saved.field);
+        if (this.stop()) {
+            var saved = localStorage.getItem('game');
+            if (saved !== null) {
+                saved = JSON.parse(saved);
+                this._time = new Date() - saved.time;
+                this._marks = saved.marks;
+                this._field.load(saved.field);
+                this.start();
 
-            this.render();
+                this.render();
+            }
         }
     };
 
     app.game.prototype.new = function(level) {
         if (this.stop()) {
-            this._field = new app.game.field(this._canvas.width, this._canvas.height, level[0], level[1], level[2]);
+            this._field = new app.game.field(this._canvas, level[0], level[1], level[2]);
             this._marks = 0;
-            this._time = new Date();
+            this._running = false;
             this.start();
             this.render();
         }
     };
 
     app.game.prototype.stop = function() {
-        return true;
+        if (!this._running) {
+            return true;
+        } else {
+            return confirm('Are you sure want to stop the current game?');
+        }
     };
 
     app.game.prototype._timeCounter = function() {
@@ -112,12 +130,13 @@ var app = (function(app) {
         this._running = false;
         this._field.markMines();
         this._canvas.classList.add('gameover');
+        new Audio('sounds/explosion.wav').play();
         this.render();
         clearInterval(this._interval);
-        alert("Game over!");
     };
 
     app.game.prototype._down = function(e) {
+        console.log("down");
         e.preventDefault();
         if (!this._running) {
             return;
@@ -168,7 +187,7 @@ var app = (function(app) {
             clearInterval(this._interval);
             var name = prompt("Enter your name", "guest");
 
-            this.highscores.addNew(name, this._level, time);
+            this.highscores.addNew(name, this._level[2], time);
             router.redirect('highscores');
         }
     };

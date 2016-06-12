@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" manifest="hexagonmines.manifest">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,10 +10,17 @@
 </head>
 <body>
     <header>
-        Hexagon Mines
+        <a href="#menu" class="fa fa-bars fa-2x"></a>
+        <span class="brand">Hexagon Mines</span>
         <nav>
             <ul>
-                <li><a href="#new"><span class="fa fa-plus fa-fw"></span>New game</a></li>
+                <li><a href="#new"><span class="fa fa-plus fa-fw"></span>New game&nbsp;<span class="fa fa-caret-down"></span></a>
+                    <ul>
+                        <li><a href="#small">Small</a></li>
+                        <li><a href="#medium">Medium</a></li>
+                        <li><a href="#large">Large</a></li>
+                    </ul>
+                </li>
                 <li><a href="#save"><span class="fa fa-save fa-fw"></span>Save game</a></li>
                 <li><a href="#load"><span class="fa fa-folder-open fa-fw"></span>Load last game</a></li>
                 <li><a href="highscores"><span class="fa fa-trophy fa-fw"></span>Highscores</a></li>
@@ -51,6 +58,9 @@
                     if (game === null) {
                         game = new app.game(document.querySelector('.game'), app.game.level.SMALL);
                     }
+                    if (game.highscores.isOpen()) {
+                        game.highscores.close();
+                    }
                     game.start();
 
                 })
@@ -68,8 +78,16 @@
             router.controller('nav a[href="#load"]', function() {
                 game.load();
             });
-            router.controller('nav a[href="#new"]', function() {
+            router.controller('nav a[href="#new"]');
+            router.controller('header a[href="#menu"]');
+            router.controller('nav a[href="#small"]', function() {
+                game.new(app.game.level.SMALL);
+            });
+            router.controller('nav a[href="#medium"]', function() {
                 game.new(app.game.level.MEDIUM);
+            });
+            router.controller('nav a[href="#large"]', function() {
+                game.new(app.game.level.LARGE);
             });
             router.controller('nav a[href="highscores"]', function() {
                 router.redirect('highscores');

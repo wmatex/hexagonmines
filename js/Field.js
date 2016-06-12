@@ -5,9 +5,9 @@ var app = (function (app) {
     var NUMBER = 0;
     var MINE = 1;
 
-    app.game.field = function (canvasWidth, canvasHeight, width, height, mineCount) {
-        canvasHeight -= 2*MARGIN;
-        canvasWidth -= 2*MARGIN;
+    app.game.field = function (canvas, width, height, mineCount) {
+        var canvasHeight = canvas.height - 2*MARGIN;
+        var canvasWidth = canvas.width - 2*MARGIN;
         if (canvasWidth > canvasHeight) {
             if (height > width) {
                 var tmp = width;
@@ -25,11 +25,17 @@ var app = (function (app) {
         this._cW = canvasWidth;
         this._cH = canvasHeight;
 
-        if (canvasWidth / width < canvasHeight / height) {
-            var x = 2*canvasWidth/(2*width + 1);
-            HEX_SIZE = x/X_LENGTH;
-        } else {
-            HEX_SIZE = 2 * canvasHeight / (3*height + 1);
+        var x = 2*canvasWidth/(2*width + 1);
+        var h1 = x/X_LENGTH;
+        var h2 = 2 * canvasHeight / (3*height + 1);
+
+        HEX_SIZE = Math.min(h1, h2);
+
+        var realWidth = width*HEX_SIZE*X_LENGTH + 0.5*HEX_SIZE*X_LENGTH +2*MARGIN
+        console.log(width, realWidth, canvasWidth);
+        if (realWidth < canvasWidth) {
+            canvas.width = realWidth;
+            this._cW = realWidth;
         }
 
         this._width = width;
@@ -206,6 +212,10 @@ var app = (function (app) {
             }
             this._data.push(row);
         }
+    };
+
+    app.game.field.prototype.resize = function(canvas) {
+
     };
 
     app.game.field.prototype.render = function (ctx) {
