@@ -86,7 +86,7 @@ header nav ul li {
 }
 
 /* Tablet */
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 868px) {
     header {
         position: static;
         width: 100%;
@@ -160,9 +160,6 @@ section {
     flex: auto;
 }
 
-section.hidden {
-    display: none;
-}
 
 .game {
     position: relative;
